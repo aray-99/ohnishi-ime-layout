@@ -2,10 +2,26 @@
 
 実施していない項目を完了扱いにしない。
 
-対象スクリプト: `OhnishiLayout.ahk`（Issue #2 で大西配列Coreを実装）。
-起動: `AutoHotkey64.exe OhnishiLayout.ahk`。Issue #2 時点の終了はタスクトレイ
-アイコンの Exit。有効/無効・状態表示・再読込・緊急終了・除外の運用操作は
-Issue #3 で追加する。
+対象スクリプト: `OhnishiLayout.ahk`。起動は `AutoHotkey64.exe OhnishiLayout.ahk`。
+操作・除外・復旧の詳細は `docs/operations.md`、送出/IME判定の観測手順は
+`docs/spike-ime.md` を参照。
+
+## 自動事前チェック（実施済み）
+
+実機・IME操作を要さない範囲で自動確認済み。詳細は各PRとdocs/spike-ime.md。
+
+| 項目 | 方法 | 結果 |
+|---|---|---|
+| 全スクリプトの構文 | `scripts/check-syntax.ps1`（AHK /ErrorStdOut, --selfcheck） | PASS |
+| IME検出プラミング | 読取専用プローブ | ひらがなで open=1 mode=0x09 [NATIVE FULLSHAPE] |
+| composition判定 | `Ime.IsJapaneseComposition()` | ひらがなで true |
+| 有効/無効ゲート | `Layout.ShouldApply()` | disabled→false |
+| 除外ゲート | `Layout.IsExcludedApp()`/`ShouldApply()` | excluded→false |
+
+参考検証環境: Windows 11 (build 26200), AutoHotkey 2.0.19。
+
+> 以下の実機項目（キー送出・Ctrl/Shift/リピート・各IMEモード・運用UX）は
+> 実機での手動確認が必要。未実施を完了扱いにしないこと。
 
 ## 環境記録
 
@@ -54,6 +70,22 @@ Issue #3 で追加する。
 | 長押し | 通常のキーリピート | 未実施 | |
 | 2～3キーの押下重なり | 通常の連続文字 | 未実施 | |
 | 高速タイピング | 再現性ある欠落等なし | 未実施 | |
+
+### 変換テスト例（ひらがなモードで物理キーを押す）
+
+大西配列では物理キーの押下位置が下記の出力に対応する。ひらがなモードで次の
+物理キー列を打ち、期待するかな/記号が出るか確認する。
+
+| 打つ物理キー | 送出ローマ字 | 期待 | 結果 |
+|---|---|---|---|
+| D S E A F | a i u e o | あいうえお | 未実施 |
+| H D K D | ka na | かな | 未実施 |
+| I D G | ra - | らー | 未実施 |
+| R T | , . | 、。 | 未実施 |
+| Shift+D | A | 大文字/対応（IME依存） | 未実施 |
+
+物理→出力の全対応は CLAUDE.md §8 と `src/ohnishi-map.ahk` を参照。
+Q P Z X C V は恒等（そのまま q p z x c v）。
 
 ## 運用
 
