@@ -3,7 +3,7 @@
 ; Ohnishi physical-to-logical mapping (Issue #2).
 ;
 ; #Included by OhnishiLayout.ahk; not run standalone (it depends on
-; ShouldUseOhnishiLayout(), defined there).
+; Layout.ShouldApply(), defined in src/context.ahk).
 ;
 ; Each hotkey suppresses the physical key and sends the logical key with
 ; {Blind}, so Shift produces the corresponding uppercase/symbol and no timing,
@@ -21,7 +21,7 @@
 ; as literal characters so AutoHotkey maps them to the active layout (ADR-011).
 ; -----------------------------------------------------------------------------
 
-#HotIf ShouldUseOhnishiLayout()
+#HotIf Layout.ShouldApply()
 
 ; Row 1:  Q W E R T Y U I O P  ->  Q L U , . F W R Y P   (Q, P identity)
 *w::Send "{Blind}l"
