@@ -57,14 +57,17 @@ Before implementation begins:
 2. Create the issues listed in `docs/issue-plan.md`.
 3. Add any missing issue discovered during technical investigation.
 4. Work on one issue at a time unless two issues are inseparable.
-5. Create a dedicated branch named `issue-<number>-<short-name>`.
-6. Keep commits focused on the issue.
+5. Create a dedicated `feature/issue-<number>-<short-name>` branch off
+   `develop` (git-flow; see `CONTRIBUTING.md` and ADR-012).
+6. Keep commits focused on the issue and use Conventional Commit subjects.
 7. Include `Closes #<number>` in the final commit or pull-request body.
 8. Do not close an issue until its acceptance criteria are met.
-9. Push the branch and open a pull request when remote access and `gh` are
-   available.
+9. Push the branch and open a pull request into `develop` when remote access
+   and `gh` are available. Merge with `--no-ff`.
 10. Merge only when checks pass. If automatic merging is unavailable, leave a
     clear merge-ready pull request.
+11. Release work uses a `release/<version>` branch off `develop`, merged into
+    `main` and tagged, then merged back into `develop`. `main` is release-only.
 
 Never create empty “process” commits only to close an issue.
 

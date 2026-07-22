@@ -106,3 +106,20 @@ SendLevelを上げる方式（自ホットキーの再発火を招くため不�
 捉えれば物理位置を正しく拾え、ターゲットを文字で送ればAHKが現在の配列に合う
 キーへ解決する。CLAUDE.md §9「印字記号＝同一VKと仮定せず実機で確認」への対応。
 実機でのVK/SC確認手順は `spike/ime-spike.ahk` の identify 機能で提供する。
+
+## ADR-012 git-flowとConventional Commitsの採用（Issue #8）
+
+**決定:** 分岐モデルにgit-flowを採用する。`main` はリリース専用（タグ付け）、
+`develop` を統合ブランチとし、各Issueは`feature/issue-<n>-<short-name>` を
+`develop` から切り、`--no-ff` で`develop` へマージする。リリースは
+`release/<version>` を`develop` から切って`main` へマージ・タグ付けし、`develop`
+へ戻す。コミット件名はConventional Commitsに従う。詳細は `CONTRIBUTING.md`。
+
+**理由:** 所有者の明示的な指示。リリースとホットフィックスの経路を分け、`main`
+を常にリリース可能な状態に保つ。CLAUDE.md §4.5 の `issue-<n>-<short-name>` は
+git-flowの接頭辞を付けて `feature/issue-<n>-<short-name>` に統合し、両立させた。
+
+**経緯:** 本方針はIssue #1（技術検証）のマージ後に採用したため、#1はsquashで
+`main` に直接入っている。公開済み履歴は書き換えない（CLAUDE.md §14）ため、
+`develop` は#1を含む現在の`main` をベースに作成した。以降のRelease 1作業は
+すべて`develop` 経由で進め、Release 1で`develop → main` をマージ・タグ付けする。
