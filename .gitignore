@@ -1,0 +1,15 @@
+# Local personal configuration
+*.local.ahk
+personal/
+!personal.example.ahk
+
+# AutoHotkey / editor artifacts
+*.log
+*.bak
+*.tmp
+.vscode/
+.idea/
+
+# Windows
+Thumbs.db
+Desktop.ini

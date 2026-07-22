@@ -1,0 +1,48 @@
+name: Bug report
+description: Report reproducible incorrect input behavior
+title: "fix: "
+labels: ["type:bug"]
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Do not paste passwords or private typed content.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Include physical keys, IME mode, application, and expected output.
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+    validations:
+      required: true
+  - type: input
+    id: ahk
+    attributes:
+      label: AutoHotkey version
+    validations:
+      required: true
+  - type: input
+    id: ime
+    attributes:
+      label: IME and input mode
+    validations:
+      required: true
+  - type: input
+    id: keyboard
+    attributes:
+      label: Physical keyboard and Windows layout
+    validations:
+      required: true
+  - type: textarea
+    id: powertoys
+    attributes:
+      label: Other remappers
+      description: Include relevant PowerToys Keyboard Manager mappings.
