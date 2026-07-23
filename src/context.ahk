@@ -36,13 +36,19 @@ class Layout {
         return (proc != "") && this.Excluded.Has(StrLower(proc))
     }
 
-    ; True while any layout-disabling modifier is physically held. Shift is not
-    ; included: Shift alone keeps the Ohnishi layout (requirement R1-05).
+    ; True while any layout-disabling modifier is held. Shift is not included:
+    ; Shift alone keeps the Ohnishi layout (requirement R1-05).
+    ;
+    ; Uses the logical key state (not physical "P"), so a modifier produced by
+    ; another remapper -- e.g. PowerToys mapping 無変換 to Ctrl -- is also
+    ; detected. Such injected modifiers do not register as physical, which
+    ; otherwise let the remap fire under Ctrl (無変換+D -> Ctrl+A). Verified on
+    ; real hardware (#14).
     static AnyBlockingModifier() {
-        return GetKeyState("Ctrl", "P")
-            || GetKeyState("Alt", "P")
-            || GetKeyState("LWin", "P")
-            || GetKeyState("RWin", "P")
+        return GetKeyState("Ctrl")
+            || GetKeyState("Alt")
+            || GetKeyState("LWin")
+            || GetKeyState("RWin")
     }
 
     ; The single predicate used by the remap hotkeys. Cheap checks first.
