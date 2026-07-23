@@ -42,14 +42,14 @@ obs.Show("x12 y12 NoActivate")
 SetTimer(UpdateObserver, 200)
 
 UpdateObserver(*) {
-    hwnd := WinExist("A")
+    hwnd := Ime.ActiveInputWindow()          ; focused control (same as the core)
     proc := "(none)"
     if hwnd {
         try proc := WinGetProcessName("ahk_id " hwnd)
     }
     open := hwnd ? Ime.OpenStatus(hwnd) : Ime.QUERY_FAILED
     mode := hwnd ? Ime.ConversionMode(hwnd) : Ime.QUERY_FAILED
-    comp := Ime.IsJapaneseComposition(hwnd)
+    comp := Ime.IsJapaneseComposition()
 
     lines := []
     lines.Push("Ohnishi IME Spike  (issue #1)")
@@ -98,8 +98,10 @@ SpikeShouldRemap() {
     global SpikeRemapOn
     if !SpikeRemapOn
         return false
-    if GetKeyState("Ctrl", "P") || GetKeyState("Alt", "P")
-        || GetKeyState("LWin", "P") || GetKeyState("RWin", "P")
+    ; logical state (not "P"): also catches injected modifiers such as a
+    ; PowerToys 無変換->Ctrl remap (see src/context.ahk / ADR-013).
+    if GetKeyState("Ctrl") || GetKeyState("Alt")
+        || GetKeyState("LWin") || GetKeyState("RWin")
         return false
     return Ime.IsJapaneseComposition()
 }

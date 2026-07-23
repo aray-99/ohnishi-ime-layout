@@ -37,6 +37,28 @@ class Ime {
         return DllCall("imm32\ImmGetDefaultIMEWnd", "Ptr", hwnd, "Ptr")
     }
 
+    ; HWND of the control with input focus in the foreground thread, or the
+    ; foreground window itself as a fallback. Querying the focused control
+    ; (not just the top-level window) is what makes detection work in modern
+    ; apps such as the Windows 11 Notepad (TSF/WinUI), where the top-level
+    ; window does not carry the IME state. Verified on real hardware (#14).
+    static ActiveInputWindow() {
+        fg := DllCall("GetForegroundWindow", "Ptr")
+        if !fg
+            return 0
+        tid := DllCall("GetWindowThreadProcessId", "Ptr", fg, "Ptr", 0, "UInt")
+        if tid {
+            info := Buffer(8 + 6 * A_PtrSize + 16, 0)   ; GUITHREADINFO
+            NumPut("UInt", info.Size, info, 0)          ; cbSize
+            if DllCall("GetGUIThreadInfo", "UInt", tid, "Ptr", info) {
+                focus := NumGet(info, 8 + A_PtrSize, "Ptr")   ; hwndFocus
+                if focus
+                    return focus
+            }
+        }
+        return fg
+    }
+
     ; Send one WM_IME_CONTROL query. Uses SendMessageTimeout with a short
     ; timeout and SMTO_ABORTIFHUNG so a stuck foreground app can never block
     ; typing; on any failure it returns QUERY_FAILED (-> QWERTY fallback).
@@ -68,7 +90,7 @@ class Ime {
     ; Any query failure or unknown state -> false (QWERTY fallback).
     static IsJapaneseComposition(hwnd := 0) {
         if !hwnd
-            hwnd := WinExist("A")          ; active window
+            hwnd := this.ActiveInputWindow()   ; focused control (modern-app safe)
         if !hwnd
             return false
         if (this.OpenStatus(hwnd) != 1)
