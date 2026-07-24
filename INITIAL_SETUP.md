@@ -15,7 +15,10 @@ git push -u origin main
 claude --model opus
 ```
 
-4. Paste the content of `prompts/IMPLEMENT_WITH_CLAUDE_CODE.md` into Claude Code.
+4. Point Claude Code at `CLAUDE.md` and work through the GitHub Issues.
 
 Do not add production AutoHotkey behavior to the Initial Commit. Let Claude Code
 implement it through GitHub Issues.
+
+> Note: this file documents the one-time bootstrap. The `LICENSE` copyright
+> holder has since been set. For ongoing work see `CONTRIBUTING.md`.

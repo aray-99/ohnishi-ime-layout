@@ -106,3 +106,48 @@ SendLevelを上げる方式（自ホットキーの再発火を招くため不�
 捉えれば物理位置を正しく拾え、ターゲットを文字で送ればAHKが現在の配列に合う
 キーへ解決する。CLAUDE.md §9「印字記号＝同一VKと仮定せず実機で確認」への対応。
 実機でのVK/SC確認手順は `spike/ime-spike.ahk` の identify 機能で提供する。
+
+## ADR-012 git-flowとConventional Commitsの採用（Issue #8）
+
+**決定:** 分岐モデルにgit-flowを採用する。`main` はリリース専用（タグ付け）、
+`develop` を統合ブランチとし、各Issueは`feature/issue-<n>-<short-name>` を
+`develop` から切り、`--no-ff` で`develop` へマージする。リリースは
+`release/<version>` を`develop` から切って`main` へマージ・タグ付けし、`develop`
+へ戻す。コミット件名はConventional Commitsに従う。詳細は `CONTRIBUTING.md`。
+
+**理由:** 所有者の明示的な指示。リリースとホットフィックスの経路を分け、`main`
+を常にリリース可能な状態に保つ。CLAUDE.md §4.5 の `issue-<n>-<short-name>` は
+git-flowの接頭辞を付けて `feature/issue-<n>-<short-name>` に統合し、両立させた。
+
+**経緯:** 本方針はIssue #1（技術検証）のマージ後に採用したため、#1はsquashで
+`main` に直接入っている。公開済み履歴は書き換えない（CLAUDE.md §14）ため、
+`develop` は#1を含む現在の`main` をベースに作成した。以降のRelease 1作業は
+すべて`develop` 経由で進め、Release 1で`develop → main` をマージ・タグ付けする。
+
+## ADR-013 修飾キー判定は論理状態を使う（Issue #14・実機検証で判明）
+
+**決定:** Ctrl/Alt/Winのバイパス判定を物理状態（`GetKeyState(..,"P")`）ではなく
+**論理状態**（`GetKeyState(..)`）で行う。
+
+**理由:** 所有者はPowerToysで 無変換→Ctrl をリマップしている。この注入された
+Ctrlは物理状態に現れず、`"P"` 判定ではバイパスが効かないため、日本語入力中に
+大西配列が Ctrl 併用でも発火し、`無変換+D → Ctrl+A → 全選択` のように壊れていた。
+論理状態なら他リマッパ（PowerToys等）による修飾キーも検出できる。実キーのCtrlは
+両方式で検出できるため後退はない。自スクリプトはCtrl/Alt/Winを送出しないため、
+論理状態が誤って立つことはない。実機（Edge, 無変換+D）で確認予定。
+
+**却下:** 物理状態のみ（PowerToys等のリマップ修飾キーを取りこぼす）。
+
+## ADR-014 IME判定はフォーカスコントロールで行う（Issue #14・実機検証で判明）
+
+**決定:** IME状態は、前面ウィンドウのトップレベルhwndではなく、
+`GetGUIThreadInfo` で得た前面スレッドの **フォーカスhwnd** に対して問い合わせる
+（フォーカスが取れない場合は前面ウィンドウにフォールバック）。
+
+**理由:** Windows 11の新メモ帳（TSF/WinUI）はトップレベルhwnd経由の
+`WM_IME_CONTROL` にIME状態を返さず、大西配列が起動しなかった。フォーカスhwnd
+（`GetGUIThreadInfo.hwndFocus`）へ問い合わせると新メモ帳でも `open`/変換モードが
+取得できることを実機で確認した。Chromium/Electron・Win32アプリ（Edge等）は
+従来どおり動作する。これはCLAUDE.md §6「近代アプリ対応」の範囲での堅牢化。
+
+**却下:** トップレベルhwndのみ（新メモ帳等のTSF/WinUIアプリでIMEを取りこぼす）。
