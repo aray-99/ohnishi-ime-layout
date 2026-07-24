@@ -99,12 +99,12 @@ Layout.Exclude("mstsc.exe")
 ## 状態
 
 - [x] 要件・基本設計 / Issue計画
-- [x] IME技術検証（検出は実機確認、送出は手順提供）
+- [x] IME技術検証（実機確認済み）
 - [x] JIS Core 実装
 - [x] 常駐運用・復旧
-- [ ] Release 1 実機手動検証（所有者、issue #4）
-- [ ] Release 1 タグ付け（検証後）
-- [ ] US互換レイヤー（Release 2）
+- [x] Release 1 実機手動検証（完了、issue #4）
+- [x] **Release 1（v1.0.0）タグ付け**
+- [ ] US互換レイヤー（Release 2, US-SPIKE）
 
 ## License
 
