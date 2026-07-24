@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force        ; a second launch replaces the first -> never double-remap
 ; -----------------------------------------------------------------------------
-; Ohnishi IME Layout -- Release 1 JIS Core
+; Ohnishi IME Layout -- Release 1 JIS Core (v1.0.0)
 ;
 ; Applies the Ohnishi layout ONLY while ALL of these hold (see src/context.ahk):
 ;   - the app-level layout switch is enabled
