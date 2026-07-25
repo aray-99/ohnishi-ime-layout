@@ -73,7 +73,7 @@ class Ime {
             , "Ptr", subCommand           ; wParam
             , "Ptr", 0                     ; lParam
             , "UInt", 0x0002               ; SMTO_ABORTIFHUNG
-            , "UInt", 50                   ; timeout (ms)
+            , "UInt", 20                   ; short timeout: only the cache timer queries (#24)
             , "Ptr*", &result
             , "Ptr")
         return ok ? result : this.QUERY_FAILED
@@ -113,7 +113,24 @@ class Ime {
 
     static Composing => this._composing
 
+    ; Refresh the cache. On any query failure/timeout the PREVIOUS value is kept
+    ; (rather than blanking to false), so a single slow/failed background query
+    ; -- e.g. while the IME is busy setting up composition -- does not cause a
+    ; spurious QWERTY leak on the next keystrokes (issue #24).
     static RefreshComposition() {
-        this._composing := this.IsJapaneseComposition()
+        hwnd := this.ActiveInputWindow()
+        if !hwnd
+            return
+        open := this.OpenStatus(hwnd)
+        if (open = this.QUERY_FAILED)
+            return
+        if (open != 1) {
+            this._composing := false
+            return
+        }
+        mode := this.ConversionMode(hwnd)
+        if (mode = this.QUERY_FAILED)
+            return
+        this._composing := (mode & this.CMODE_NATIVE) ? true : false
     }
 }

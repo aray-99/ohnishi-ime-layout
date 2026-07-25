@@ -47,7 +47,7 @@ if (A_Args.Length >= 1 && A_Args[1] = "--selfcheck")
 ; reads a cached value instantly instead of doing a cross-process query on the
 ; keyboard hook path (which dropped/reordered keys while typing fast -- #24).
 Ime.RefreshComposition()
-SetTimer(() => Ime.RefreshComposition(), 25)
+SetTimer(() => Ime.RefreshComposition(), 20)
 
 InitTray()
 TrayTip("Started and enabled. Ctrl+Alt+F10 = status.", "Ohnishi Layout")
