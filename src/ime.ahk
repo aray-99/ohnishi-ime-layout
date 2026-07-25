@@ -110,27 +110,44 @@ class Ime {
     ; which only matters within ~one interval of an IME mode switch -- far
     ; shorter than the human gap between switching modes and typing.
     static _composing := false
+    static _failCount := 0
+    static FAIL_LIMIT := 10   ; consecutive failed queries -> state undeterminable
 
-    static Composing => this._composing
+    ; Cached composition state read by the remap predicate (instant; no query on
+    ; the keyboard hook path). A single transient query failure keeps the
+    ; last-known value, so it does not cause a spurious QWERTY leak on the next
+    ; keystrokes (issue #24). Only after FAIL_LIMIT consecutive failed queries is
+    ; the state treated as undeterminable, falling back to QWERTY (CLAUDE.md §7).
+    ; Timer starvation during a fast burst attempts no query, so it cannot
+    ; false-trip the fallback.
+    static Composing {
+        get {
+            return (this._failCount >= this.FAIL_LIMIT) ? false : this._composing
+        }
+    }
 
-    ; Refresh the cache. On any query failure/timeout the PREVIOUS value is kept
-    ; (rather than blanking to false), so a single slow/failed background query
-    ; -- e.g. while the IME is busy setting up composition -- does not cause a
-    ; spurious QWERTY leak on the next keystrokes (issue #24).
     static RefreshComposition() {
         hwnd := this.ActiveInputWindow()
-        if !hwnd
+        if !hwnd {
+            this._failCount++
             return
+        }
         open := this.OpenStatus(hwnd)
-        if (open = this.QUERY_FAILED)
+        if (open = this.QUERY_FAILED) {
+            this._failCount++
             return
+        }
         if (open != 1) {
             this._composing := false
+            this._failCount := 0
             return
         }
         mode := this.ConversionMode(hwnd)
-        if (mode = this.QUERY_FAILED)
+        if (mode = this.QUERY_FAILED) {
+            this._failCount++
             return
+        }
         this._composing := (mode & this.CMODE_NATIVE) ? true : false
+        this._failCount := 0
     }
 }
