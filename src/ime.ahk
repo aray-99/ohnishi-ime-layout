@@ -100,4 +100,20 @@ class Ime {
             return false
         return (mode & this.CMODE_NATIVE) ? true : false
     }
+
+    ; --- Cached composition state (issue #24) --------------------------------
+    ; The cross-process WM_IME_CONTROL query is too slow to run on every
+    ; keystroke inside the remap predicate: it blocked the keyboard hook and
+    ; caused dropped/reordered keys ("メモ帳" -> "あめfもty") during fast typing.
+    ; Instead a background timer refreshes this cache and the predicate reads it
+    ; instantly. Trade-off: the value can be up to one refresh interval stale,
+    ; which only matters within ~one interval of an IME mode switch -- far
+    ; shorter than the human gap between switching modes and typing.
+    static _composing := false
+
+    static Composing => this._composing
+
+    static RefreshComposition() {
+        this._composing := this.IsJapaneseComposition()
+    }
 }
