@@ -159,6 +159,8 @@ Physical: Z X C V B N M , . /
 Logical:  Z X C V ; G D M J B
 ```
 
+The number-row `-` key (minus, above `@` on JIS) maps to `/` (issue #23).
+
 Mappings whose source and destination are identical may be omitted from code,
 but the complete mapping must remain documented and tested.
 

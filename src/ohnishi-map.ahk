@@ -16,7 +16,9 @@
 ;   Physical: Q W E R T Y U I O P    A S D F G H J K L ;    Z X C V B N M , . /
 ;   Logical:  Q L U , . F W R Y P    E I A O - K T N S H    Z X C V ; G D M J B
 ;
-; Source keys: letters by letter; the four punctuation keys by SCAN CODE so the
+; Plus the number-row '-' key (minus, above @ on JIS) -> '/' (issue #23).
+;
+; Source keys: letters by letter; the punctuation keys by SCAN CODE so the
 ; correct PHYSICAL keys are captured on a JIS keyboard. Symbol targets are sent
 ; as literal characters so AutoHotkey maps them to the active layout (ADR-011).
 ; -----------------------------------------------------------------------------
@@ -52,5 +54,8 @@
 *SC033::Send "{Blind}m"      ; physical ',' key  ->  M
 *SC034::Send "{Blind}j"      ; physical '.' key  ->  J
 *SC035::Send "{Blind}b"      ; physical '/' key  ->  B
+
+; Number row:  physical '-' (minus, above @ on JIS)  ->  '/'   (issue #23)
+*SC00C::Send "{Blind}/"
 
 #HotIf
