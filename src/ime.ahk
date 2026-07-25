@@ -73,7 +73,7 @@ class Ime {
             , "Ptr", subCommand           ; wParam
             , "Ptr", 0                     ; lParam
             , "UInt", 0x0002               ; SMTO_ABORTIFHUNG
-            , "UInt", 50                   ; timeout (ms)
+            , "UInt", 20                   ; short timeout: only the cache timer queries (#24)
             , "Ptr*", &result
             , "Ptr")
         return ok ? result : this.QUERY_FAILED
@@ -99,5 +99,55 @@ class Ime {
         if (mode = this.QUERY_FAILED)
             return false
         return (mode & this.CMODE_NATIVE) ? true : false
+    }
+
+    ; --- Cached composition state (issue #24) --------------------------------
+    ; The cross-process WM_IME_CONTROL query is too slow to run on every
+    ; keystroke inside the remap predicate: it blocked the keyboard hook and
+    ; caused dropped/reordered keys ("メモ帳" -> "あめfもty") during fast typing.
+    ; Instead a background timer refreshes this cache and the predicate reads it
+    ; instantly. Trade-off: the value can be up to one refresh interval stale,
+    ; which only matters within ~one interval of an IME mode switch -- far
+    ; shorter than the human gap between switching modes and typing.
+    static _composing := false
+    static _failCount := 0
+    static FAIL_LIMIT := 10   ; consecutive failed queries -> state undeterminable
+
+    ; Cached composition state read by the remap predicate (instant; no query on
+    ; the keyboard hook path). A single transient query failure keeps the
+    ; last-known value, so it does not cause a spurious QWERTY leak on the next
+    ; keystrokes (issue #24). Only after FAIL_LIMIT consecutive failed queries is
+    ; the state treated as undeterminable, falling back to QWERTY (CLAUDE.md §7).
+    ; Timer starvation during a fast burst attempts no query, so it cannot
+    ; false-trip the fallback.
+    static Composing {
+        get {
+            return (this._failCount >= this.FAIL_LIMIT) ? false : this._composing
+        }
+    }
+
+    static RefreshComposition() {
+        hwnd := this.ActiveInputWindow()
+        if !hwnd {
+            this._failCount++
+            return
+        }
+        open := this.OpenStatus(hwnd)
+        if (open = this.QUERY_FAILED) {
+            this._failCount++
+            return
+        }
+        if (open != 1) {
+            this._composing := false
+            this._failCount := 0
+            return
+        }
+        mode := this.ConversionMode(hwnd)
+        if (mode = this.QUERY_FAILED) {
+            this._failCount++
+            return
+        }
+        this._composing := (mode & this.CMODE_NATIVE) ? true : false
+        this._failCount := 0
     }
 }

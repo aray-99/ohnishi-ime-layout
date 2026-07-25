@@ -59,6 +59,6 @@ class Layout {
             return false
         if this.AnyBlockingModifier()
             return false
-        return Ime.IsJapaneseComposition()        ; false on any query failure
+        return Ime.Composing        ; fast cached state (refreshed by a timer); #24
     }
 }

@@ -43,6 +43,12 @@ if (A_Args.Length >= 1 && A_Args[1] = "--selfcheck")
 #Include *i %A_ScriptDir%\personal.local.ahk
 
 ; ---- resident operation -----------------------------------------------------
+; Keep the IME composition state fresh in the background so the remap predicate
+; reads a cached value instantly instead of doing a cross-process query on the
+; keyboard hook path (which dropped/reordered keys while typing fast -- #24).
+Ime.RefreshComposition()
+SetTimer(() => Ime.RefreshComposition(), 20)
+
 InitTray()
 TrayTip("Started and enabled. Ctrl+Alt+F10 = status.", "Ohnishi Layout")
 
